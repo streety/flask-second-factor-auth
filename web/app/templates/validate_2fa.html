@@ -1,0 +1,40 @@
+{% from "macros.html" import form_field_with_errors with context %}
+
+{% extends "layout.html" %}
+
+{% block head %}
+
+{{ super() }}
+		<script>
+setTimeout(function() {
+		var request = {"challenge":"{{ challenge }}",
+						"version":"{{ version }}",
+						"keyHandle":"{{ keyHandle }}",
+						"appId":"{{ app_id }}"};
+		var appId = request.appId;
+		var challenge = request.challenge;
+		var registeredKeys = [{version: request.version, 
+				keyHandle: request.keyHandle}];
+		u2f.sign(appId, challenge, registeredKeys, function(data) {
+				$('#response').val(JSON.stringify(data));
+				$('#sign-2fa-form').submit();
+		});
+}, 1000);
+		</script>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="content">
+		{{ super() }}
+		<h1>Authenticate with U2F Device</h1>
+<p>Press the button on the token you have called {{ key.name }}.</p>
+
+<form method="POST" action="" id="sign-2fa-form">
+    {{ form.hidden_tag() }}
+    {{ form.response }}
+	<!--<button type="submit">Register</button>-->
+</form>
+</div>
+{% endblock %}

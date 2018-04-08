@@ -1,0 +1,173 @@
+body {
+		height: 100%;
+		background-color: #f5f5f5;
+		display: -ms-flexbox;
+		display: -webkit-box;
+		display: flex;
+		-webkit-box-pack: center;
+		-webkit-box-align: center;
+		-ms-flex-align: center;
+		-ms-flex-pack: center;
+		justify-content: center;
+		align-items: center;
+		text-align: center;
+		padding-top: 40px;
+		padding-bottom: 40px;
+}
+
+div.content {
+		width: 100%;
+		max-width: 330px;
+		padding: 15px;
+		margin: 0 auto;
+}
+
+form.account-form {
+		width: 100%;
+		max-width: 330px;
+		padding: 15px;
+		margin: 0 auto;
+}
+
+form > h1 {
+		font-weight: 400;
+		font-size: 1.75rem;
+		margin-bottom: 1rem;
+
+}
+
+.sr-only {
+		position:absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		overflow: hidden;
+		clip rect(0,0,0,0);
+		white-space: nowrap;
+		-webkit-clip-path: inset(50%);
+		clip-path: inset(50%);
+		border: 0;
+}
+
+label {
+		display: inline-block;
+		margin-bottom: 0.5rem;
+}
+
+.form-control {
+		position: relative;
+		box-sizing: border-box;
+		display: block;
+		width: 100%;
+		line-height: 1.5;
+		color: #495057;
+		background-color: #ffffff;
+		background-clip: padding-box;
+		border: 1px solid #ced4da;
+		border-radius: 0.25rem;
+		transition: border-color 0.15s ease-in-out,box-shadow 0.15s ease-in-out;
+		height: auto;
+		padding: 10px;
+		font-size: 16px;
+}
+
+input#username {
+		margin-bottom: -1px;
+		border-bottom-right-radius: 0;
+		border-bottom-left-radius: 0;
+}
+
+input#password {
+		margin-bottom: 10px;
+		border-top-right-radius: 0;
+		border-top-left-radius: 0;
+}
+
+input#name {
+		margin-bottom: 10px;
+}
+
+.form-control:focus {
+		color: #495057;
+		background-color: #ffffff;
+		border-color: #1ace6e;
+		outline: 0;
+		box-shadow: 0 0 0 0.2rem rgba(26, 206, 110, 0.25);
+		z-index: 2;
+}
+
+button {
+		cursor: pointer;
+		display: block;
+		width: 100%;
+		padding: 0.5rem 1rem;
+		font-size:1.25rem;
+		border-radius: 0.3rem;
+		color: #ffffff;
+		background-color: #00b454;
+		border-color: #00b454;
+		font-weight: 400;
+		white-space: nowrap;
+		vertical-align: middle;
+		border: 1px solid transparent;
+		transition: color 0.15s ease-in-out,background-color 0.15s ease-in-out,border-color 0.15s ease-in-out,box-shadow 0.15s ease-in-out;
+}
+
+button:focus {
+		color: #ffffff;
+		background-color: #00b454;
+		border-color: #1ace6e;
+		outline: 0;
+		box-shadow: 0 0 0 0.2rem rgba(26, 206, 110, 0.25);
+		z-index: 2;
+}
+
+.account-actions button {
+		margin: 10px 0;
+}
+
+.account-actions button:focus, button:hover {
+		border-color: #1ace6e;
+		outline: 0;
+		box-shadow: 0 0 0 0.2rem rgba(26,206,110,0.25);
+}
+
+.account-actions a {
+		text-decoration: none;
+}
+
+button .date-added {
+		font-size: 0.75rem;
+}
+
+.alert {
+		position: relative;
+		padding: 0.75rem 1.25rem;
+		margin-bottom: 1rem;
+		border: 1px solid transparent;
+		border-radius: 0.25rem;
+}
+
+.alert-primary {
+		color: #004085;
+		background-color: #cce5ff;
+		border-color: #b8daff;
+}
+
+.alert-success {
+		color: #155724;
+		background-color: #d4edda;
+		border-color: #c3e6cb;
+}
+
+.alert-info {
+		color: #0c5460;
+		background-color: #d1ecf1;
+		border-color: #bee5eb;
+}
+
+.alert-error {
+		color: #856404;
+		background-color: #fff3cd;
+		border-color: #ffeeba;
+}

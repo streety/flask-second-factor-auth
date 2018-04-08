@@ -1,0 +1,39 @@
+version: "3"
+
+services:
+    application:
+        restart: always
+        build: ./web/
+        expose:
+            - "5000"
+        volumes:
+            - "./web:/app"
+        env_file: .env
+        command: gunicorn -b 0.0.0.0:5000 --reload app:app
+        links:
+            - database
+
+    webserver:
+        restart: always
+        build: ./nginx/
+        ports:
+            - "80:80"
+            - "443:443"
+        links:
+            - application
+        volumes:
+            - "./web/app/static:/www/static"
+
+
+    database:
+        restart: always
+        image: postgres:9.6
+        volumes:
+            - database_data:/var/lib/postgresql
+        expose:
+            - "5432"
+
+
+volumes:
+    database_data:
+        driver: local

@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+
+<div class="content">
+<h1>FIDO U2F Flask login demonstration</h1>
+
+{{ super() }}
+
+{% if current_user.is_authenticated %}
+<p>You are currently authenticated as {{ current_user.user.username }}</p>
+{% else %}
+<p>You are not currently authenticated</p>
+{% endif %}
+
+	<div class="account-actions">
+		<a href="{{ url_for('register') }}"><button>Register</button></a>
+		<a href="{{ url_for('login') }}"><button>Login</button></a>
+		<a href="{{ url_for('add_2fa') }}"><button>Add device</button></a>
+		<a href="{{ url_for('logout') }}"><button>Logout</button></a>
+	</div>
+</div>
+{% endblock %}

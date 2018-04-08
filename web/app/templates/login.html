@@ -1,0 +1,15 @@
+{% from "macros.html" import form_field_with_errors with context %}
+
+{% extends "layout.html" %}
+
+{% block body %}
+
+<form method="POST" action="" id="login-form" class="account-form">
+	{{ super() }}
+	<h1>Please log in</h1>
+    {{ form.hidden_tag() }}
+    {{ form_field_with_errors(form.username, required=true, autofocus=True, placeholder="Username") }}
+    {{ form_field_with_errors(form.password, required=true, placeholder="Password") }}
+    <button type="submit">Login</button>
+</form>
+{% endblock %}

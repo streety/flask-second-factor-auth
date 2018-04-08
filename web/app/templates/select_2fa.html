@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block body %}
+
+
+
+<div class="account-actions">
+		{{ super() }}
+		<h1>Select device</h1>
+{% for key in keys %}
+	<a href="{{ url_for('validate_2fa', name=key.name) }}">
+			<button>{{ key.name }}
+					<div class="date-added">
+							Added at {{ key.date_added.strftime("%H:%M") }} 
+							on {{ key.date_added.strftime("%Y-%m-%d") }}
+					</div>
+			</button>
+	</a>
+{% endfor %}
+</div>
+
+{% endblock %}
