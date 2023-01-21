@@ -5,22 +5,21 @@
 {% block head %}
 
 {{ super() }}
-		<script>
-setTimeout(function() {
-		var request = {"challenge":"{{ challenge }}",
-						"version":"{{ version }}",
-						"keyHandle":"{{ keyHandle }}",
-						"appId":"{{ app_id }}"};
-		var appId = request.appId;
-		var challenge = request.challenge;
-		var registeredKeys = [{version: request.version, 
-				keyHandle: request.keyHandle}];
-		u2f.sign(appId, challenge, registeredKeys, function(data) {
-				$('#response').val(JSON.stringify(data));
-				$('#sign-2fa-form').submit();
-		});
-}, 1000);
-		</script>
+
+<script type="module">
+ import {get, parseRequestOptionsFromJSON, } from "{{ url_for('static', filename='js/webauthn-json.browser-ponyfill.js') }}";
+
+ const elemBegin = document.getElementById('sign-2fa-form');
+ elemBegin.addEventListener('submit', async (e) => {
+     e.preventDefault();
+     let options = parseRequestOptionsFromJSON({{ authentication_options|safe }});
+     let response = await get(options);
+     $('#response').val(JSON.stringify(response));
+     $('#sign-2fa-form').submit();
+ }, 1000);
+
+</script>
+
 
 {% endblock %}
 
@@ -34,7 +33,7 @@ setTimeout(function() {
 <form method="POST" action="" id="sign-2fa-form">
     {{ form.hidden_tag() }}
     {{ form.response }}
-	<!--<button type="submit">Register</button>-->
+	<button type="submit">Sign in</button>
 </form>
 </div>
 {% endblock %}
