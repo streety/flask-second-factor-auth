@@ -11,7 +11,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(140), index=True, unique=True, )
     joined = db.Column(db.DateTime, )
-    password_hash = db.Column(db.Binary(60), )
+    password_hash = db.Column(db.LargeBinary(60), )
     u2f_credentials = db.relationship('U2FCredentials', backref='user', lazy='dynamic', )
 
     def __init__(self, username, password, joined=None):

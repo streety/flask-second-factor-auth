@@ -1,21 +1,30 @@
-from app import app, db, load_user
-from flask import render_template, session, url_for, redirect, flash
-import flask_login
-from u2flib_server.u2f import (begin_registration, begin_authentication,
-                               complete_registration, complete_authentication)
 import json
+import os
 
-from app import forms
-from app import models
+import fido2.features
+import flask_login
+from app import app, db, forms, load_user, models
+from fido2.server import Fido2Server
+from fido2.webauthn import (AttestedCredentialData,
+                            PublicKeyCredentialRpEntity,
+                            PublicKeyCredentialUserEntity)
+from flask import flash, redirect, render_template, session, url_for
 
-app_id = 'https://u2f-demo.local'
+rp_id = os.environ['AUTHN_ID']
+expected_origin = os.environ['AUTHN_ORIGIN']
+
+fido2.features.webauthn_json_mapping.enabled = True
+rp = PublicKeyCredentialRpEntity(name=os.environ["AUTHN_NAME"], id=rp_id)
+fido_server = Fido2Server(rp)
+
+
 
 
 @app.route('/')
 def index():
     return render_template('index.html')
-    
-    
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = forms.RegisterForm()
@@ -62,14 +71,18 @@ def select_2fa():
 @app.route('/validate-2fa/<name>', methods=['GET', 'POST'])
 def validate_2fa(name):
     form = forms.SignTokenForm()
+    key = models.U2FCredentials.query.filter_by(owner=session['user'],
+                                                name=name).first()
+    device = _restore_credential_data(key.device)
     if form.validate_on_submit():
-        errorCode = json.loads(form.response.data)['errorCode']
-        if errorCode != 0:
-            flash("Token authentication failed", "error")
-            return redirect(url_for('select_2fa'))
-        device, c, t = complete_authentication(session['u2f_sign'],
-                                              form.response.data, app_id)
-        if t != 1:
+        response = json.loads(form.response.data)
+        try:
+            result = fido_server.authenticate_complete(
+                session["webauthn_challenge"],
+                [device, ],
+                response,
+            )
+        except:
             flash("Token authentication failed", "error")
             return redirect(url_for('select_2fa'))
         # Log in the user
@@ -78,43 +91,57 @@ def validate_2fa(name):
         flash("Login complete", "success")
         return redirect(url_for('index'))
     key = models.U2FCredentials.query.filter_by(owner=session['user'],
-                                               name=name).first()
-    sign = begin_authentication(app_id, [key.device])
-    session['u2f_sign'] = sign.json
-    challenge = sign['challenge']
-    registeredKeys = json.loads(sign['registeredKeys'][0])
-    version = registeredKeys['version']
-    keyHandle = registeredKeys['keyHandle']
-
-    return render_template('validate_2fa.html', challenge=challenge,
-                          version=version,
-                          keyHandle=keyHandle,
-                          app_id=app_id,
-                          form=form,
-                          key=key)
+                                                name=name).first()
+    device = _restore_credential_data(key.device)
+    options, state = fido_server.authenticate_begin([device, ])
+    session["webauthn_challenge"] = state
+    #session['u2f_sign'] = sign.json
+    return render_template(
+        'validate_2fa.html',
+        form=form,
+        key=key,
+        authentication_options = json.dumps(dict(options)),
+    )
 
 
 @app.route('/add-2fa', methods=['GET', 'POST'])
 def add_2fa():
+    rp_name="Jonathan Street personal site"
     form = forms.AddTokenForm()
+    user = models.User.query.filter_by(id=session['user']).first()
     if form.validate_on_submit():
+        auth_data = fido_server.register_complete(session["webauthn_challenge"], json.loads(form.response.data))
+        cred_data = _store_credential_data(auth_data.credential_data)
         # Complete 2FA registration
-        registered_device = complete_registration(session['u2f_enroll'],
-                                            form.response.data)[0].json
-        user = models.User.query.filter_by(id=session['user']).first()
         u2f_cred = models.U2FCredentials(name = form.name.data,
                                          owner = user.id,
-                                         device = registered_device)
+                                         device = cred_data)
         db.session.add(u2f_cred)
         db.session.commit()
         flash("Authentication token added", "success")
         return redirect(url_for('login'))
     # Start 2FA registration
-    enroll = begin_registration(app_id, [])
-    session['u2f_enroll'] = enroll.json
-    challenge = enroll.data_for_client['registerRequests'][0]['challenge']
-    return render_template('add_2fa.html', 
-                           challenge = challenge, 
-                           appId = app_id,
-                           version = "U2F_V2",
-                           form=form)
+    options, state = fido_server.register_begin(
+        PublicKeyCredentialUserEntity(
+            id=b"user_id",
+            name=user.username,
+            display_name=user.username,
+        ),
+        [],
+        user_verification="discouraged",
+        authenticator_attachment="cross-platform"
+    )
+    options = dict(options)
+    session["webauthn_challenge"] = state
+    return render_template(
+        'add_2fa.html',
+        registration_options = json.dumps(dict(options)),
+        form=form,
+    )
+
+
+def _store_credential_data(cred):
+    return cred.hex()
+
+def _restore_credential_data(cred):
+    return AttestedCredentialData.fromhex(cred)

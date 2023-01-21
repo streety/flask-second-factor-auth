@@ -5,25 +5,27 @@
 {% block head %}
 {{ super() }}
 
-<script>
-setTimeout(function() {
-		var appId = "{{ appId }}"
-		var registerRequests = [{version: "{{ version }}", 
-				challenge: "{{ challenge }}" }];
-		u2f.register(appId, registerRequests, [], function(data) {
-				$('#response').val(JSON.stringify(data));
-				$('#add-2fa-form').submit();
-		});
-}, 1000);	
+<script type="module">
+ import {create, parseCreationOptionsFromJSON} from "{{ url_for('static', filename='js/webauthn-json.browser-ponyfill.js') }}";
+ const elemBegin = document.getElementById('add-2fa-form');
+ elemBegin.addEventListener('submit', async (e) => {
+     e.preventDefault();
+     let options = parseCreationOptionsFromJSON({{ registration_options|safe }});
+     let response = await create(options);
+     $('#response').val(JSON.stringify(response));
+     $('#add-2fa-form').submit();
+ }, 1000);
+
 </script>
+
 {% endblock %}
 
 {% block body %}
     <form method="POST" action="" id="add-2fa-form" class="account-form">
-		<h1>Add device</h1>
-		{{ form.hidden_tag() }}
+		    <h1>Add device</h1>
+		    {{ form.hidden_tag() }}
         {{ form_field_with_errors(form.name, placeholder="Device name") }}
-        <button type="submit">Submit</button>
+        <button id="register_2fa_device" type="submit">Submit</button>
     </form>
 
 {% endblock %}

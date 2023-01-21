@@ -1,17 +1,17 @@
 import os
 import bcrypt
 from wtforms import form, fields, validators
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms import TextAreaField, StringField, validators
 
 from app import models
 
 
-class RegisterForm(Form):
+class RegisterForm(FlaskForm):
     """ Registration form with built in validation of unique username. """
-    username = fields.TextField(validators=[validators.required()])
-    password = fields.PasswordField(validators=[validators.required()])
-    
+    username = fields.StringField(validators=[validators.InputRequired()])
+    password = fields.PasswordField(validators=[validators.InputRequired()])
+
     def validate_username(self, field):
         user = models.User.query.filter_by(username=self.username.data).first()
         if user != None:
@@ -19,15 +19,15 @@ class RegisterForm(Form):
             raise validators.ValidationError('Username already in use')
 
 
-class LoginForm(Form):
+class LoginForm(FlaskForm):
     """ Login form with built in validation of password. """
 
-    username = fields.TextField(validators=[validators.required()])
-    password = fields.PasswordField(validators=[validators.required()])
+    username = fields.StringField(validators=[validators.InputRequired()])
+    password = fields.PasswordField(validators=[validators.InputRequired()])
 
     def validate_password(self, field):
         self.user = models.User.query.filter_by(username=self.username.data).first()
-        
+
         if self.user == None:
             raise validators.ValidationError('Invalid username or password')
 
@@ -37,15 +37,15 @@ class LoginForm(Form):
             raise validators.ValidationError('Invalid username or password')
 
 
-class AddTokenForm(Form):
+class AddTokenForm(FlaskForm):
     """ Form to add a U2F token. """
 
-    name = fields.TextField(validators=[validators.required()])
-    response = fields.HiddenField(validators=[validators.required()])
+    name = fields.StringField(validators=[validators.InputRequired()])
+    response = fields.HiddenField(validators=[validators.InputRequired()])
 
 
-class SignTokenForm(Form):
+class SignTokenForm(FlaskForm):
     """ Sign in using a token """
 
-    response = fields.HiddenField(validators=[validators.required()])
+    response = fields.HiddenField(validators=[validators.InputRequired()])
 
